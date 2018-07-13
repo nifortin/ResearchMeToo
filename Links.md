@@ -1,4 +1,4 @@
-# Links 
+# Links
 
 ## EEOC
 
@@ -10,5 +10,8 @@
 
 ## Others
 -  https://trends.google.com/trends/explore?date=today%205-y&geo=US&q=%23MeToo
+
+![Google Trend by state](data/google-trends/metoo-by-state.png "MeToo by state")
+
 -  https://www.theguardian.com/media/2018/jun/10/cost-of-government-rises-when-local-newspaper-closes-study-finds
 -  http://econprediction.eecs.umich.edu/
