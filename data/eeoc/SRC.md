@@ -9,4 +9,6 @@ https://www1.eeoc.gov/eeoc/statistics/enforcement/charges_by_state.cfm
 - then extract the HTML table and convert to data
 
  (this is probably trivial in Python)
- 
+
+# Sexual harassment by State
+https://www.eeoc.gov/eeoc/statistics/enforcement/sexual_harassment_eeoc_only_by_state.cfm
