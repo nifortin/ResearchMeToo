@@ -1,10 +1,6 @@
 # Pull tweets from various datasets
 
-library(data.table)
-library(dplyr)
-library(sf)
-library(ggplot2)
-library(ggthemes)
+source("config.R",echo=TRUE)
 library(tweetdata) # Patrick Baylis' package for extracting tweets on server.
 
 # Pull tweets for the USA for a limited time frame
