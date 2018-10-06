@@ -1,0 +1,152 @@
+---
+title: "Downloading QWI"
+author: "Lars Vilhuber"
+output:
+  html_document:
+    keep_md: yes
+    self_contained: no
+    toc: yes
+    toc_depth: 1
+  pdf_document:
+    keep_tex: yes
+    toc: yes
+    toc_depth: 1
+---
+
+
+
+```{r options, echo=FALSE,warning=FALSE,message=FALSE}
+source("config.R",echo=TRUE)
+```
+LEHD States which will be downloaded:
+```{r print_states, cache=TRUE}
+kable(qwistates,row.names = FALSE)
+```
+
+# Parameters
+
+- qwivintage = `r qwivintage`
+
+We will grab the metadata to ascertain which version it is.
+
+```{r qwi_parameters,cache=TRUE}
+# common quarter to look at
+# this could be deduced from metadata, here we hard-code it
+# This should be turned into function and run within the download loop
+qwivintage <- "latest_release"
+# Read the version file
+test_state <- "al"
+version.url <- url(paste(urlbase,qwivintage,test_state,"version_qwi.txt",sep="/"))
+version <- read.csv(version.url,header = FALSE,sep = "",as.is = TRUE)
+names(version) <- c("type","state","fips","range","schema","release","vintage")
+write.csv(x = version[,c("type","schema","release")],file=file.path(datadir,"metadata.csv"))
+```
+
+# Some Technical Stuff
+
+We first define (source) a function '[download_qwi.R](download_qwi.R)' to download and subset QWI CSV files.
+```{r define_function,cache=FALSE}
+source("download_qwi.R",echo = TRUE)
+download.date <- Sys.Date()
+```
+A convenience function:
+```{r define_func2, cache=FALSE}
+download_tasks <- function (state,subset=TRUE) {
+	dat <- download_qwi(state,"sa_f_gc_ns_op_u")
+	dat$state <- tolower(state)
+    if (subset) {
+    	dat <- filter(dat,
+    			  geo_level=="C" & 
+                  ownercode=="A05" & 
+                  race =="A0" & 
+                  ethnicity =="A0" & 
+                  education == "E0" & 
+                  firmage=="0" & 
+                  firmsize=="0" &
+                  year == qwiyear & 
+                  quarter == qwiquarter 
+                  #sex=="0" & 
+                  #agegrp =="A00" & 
+                )
+    return(dat)
+    }
+}
+download_version <- function (state,old=FALSE) {
+	if (old) {
+		# for some states, the location is the new one, but the filename is the old one
+		print(paste("Special processing for",state))
+		filename <- paste(urlbase,qwivintage,tolower(state),"version_sa_f.txt",sep="/")
+	} else {
+		filename <- paste(urlbase,qwivintage,tolower(state),"version_qwi.txt",sep="/")
+	}
+	print(filename)
+	version.url <- url(filename)
+    version <- read.csv(version.url,header = FALSE,sep = "",as.is = TRUE) 
+    names(version) <- c("type","state","fips","range","schema","release","vintage")
+    version$download_date <- Sys.Date()
+    if (old) {
+    	version$type = "QWI_F"
+    } else {
+    	version <- filter(version,type=="QWI_F")
+    }
+    return(version)
+
+}
+
+```
+
+We then cycle through all the states and download the relevant file. Note: there are a few problem states (primarily for the metadata) as of 2018-10, which we have to handle separately.
+```{r}
+oldstates <- "AK FL SD"
+oldstates <- unlist(strsplit(oldstates," "))
+
+```
+
+```{r download_all,cache=TRUE}
+tic.clearlog()
+for (x in qwistates) { 
+  tic(x)
+  eval(parse(text=paste("dat <- download_tasks(\"",x,"\")",sep = "")))
+  # combine the files
+  if (x == qwistates[1]) {
+  	all <- dat
+  } else {
+  	all <- rbind(all,dat)
+  }
+  toc(log = TRUE, quiet = TRUE)
+  }
+log.txt <- tic.log(format = TRUE)
+log.lst <- tic.log(format = FALSE)
+timings <- unlist(lapply(log.lst, function(x) x$toc - x$tic))
+```
+The above code can take a while, in this example and on my computer, it ran for `r round(sum(timings)/60,2)` minutes on `r Sys.Date()`.
+
+Save the data into a single file:
+```{r write_states,cache=TRUE}
+write.csv(x = all,file=file.path(datadir,"qwi_extract.csv"))
+saveRDS(all,file=file.path(datadir,"qwi_extract.RDS"))
+```
+Collect metadata:
+```{r collate_metadata,cache=TRUE}
+# also do the versions
+tic.clearlog()
+for (x in qwistates) { 
+  tic(x)
+  if (x %in% oldstates) {
+  	eval(parse(text=paste("dat<- download_version(\"",x,"\",old=TRUE)",sep = "")))
+    } else {
+    eval(parse(text=paste("dat<- download_version(\"",x,"\")",sep = "")))
+    }
+  if (x == qwistates[1]) {
+  	version <- dat
+  } else {
+  	version <- rbind(version,dat)
+  }
+  toc(log = TRUE, quiet = TRUE)
+  }
+
+timings.version <- unlist(lapply(tic.log(format=FALSE), function(x) x$toc - x$tic))
+
+write.csv(x = version,file=file.path(datadir,"metadata.csv"))
+```
+The above code can take a while, in this example and on my computer, it ran for `r round(sum(timings.version)/60,2)` minutes on `r Sys.Date()`.
