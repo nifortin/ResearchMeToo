@@ -5,12 +5,7 @@ source("config.R",echo=TRUE)
 
 # Plot-----
 
-metoo_tweets_before2017 <- readRDS("data/metoo_tweets_before2017.Rds")
-metoo_tweets_after2017 <- readRDS("data/metoo_tweets_after2017.Rds")
-
-metoo_tweets <- rbind(metoo_tweets_before2017, metoo_tweets_after2017)
-metoo_tweets <- metoo_tweets %>% mutate(metoo = as.numeric(grepl("#metoo", tolower(tweet)))) %>%
-  mutate(metoo = factor(metoo, levels = c(0, 1), labels = c("#timesup", "#metoo")))
+metoo_tweets <- readRDS(tweets.rds)
 
 metoo_bydate <- metoo_tweets %>% group_by(localDate, metoo) %>% summarise(N = n())
 
@@ -25,13 +20,12 @@ ggplot(metoo_bydate) + geom_line(mapping = aes(x = localDate, y = N, colour = me
   labs(x = NULL) +
   scale_colour_discrete(name = NULL) +
   theme_tufte()
-ggsave("results/daily-count-full.png", width = 6, height = 4)
+ggsave(file.path(resultsdir,"daily-count-full.png"), width = 6, height = 4)
 
 ggplot(metoo_bydate %>% filter(localDate >= as.IDate("2017-10-01"))) + geom_line(mapping = aes(x = localDate, y = N, colour = metoo, group = metoo)) +
   scale_y_continuous(name = "Daily count of geotagged tweets", label = comma) +
   scale_x_date(name = NULL, date_breaks = "1 month", date_labels =  "%b %Y") +
   scale_colour_discrete(name = NULL) +
   theme_tufte()
-ggsave("results/daily-count-after-oct2017.png", width = 6, height = 4)
+ggsave(file.path(resultsdir,"daily-count-after-oct2017.png"), width = 6, height = 4)
 
-write_csv(metoo_tweets, "data/metoo_tweets.csv.gz")
