@@ -21,7 +21,7 @@ sys <- Sys.info()
 if ( sys["user"] == "pbaylis" ) {
 packages=c("data.table","dplyr","sf","ggplot2","ggthemes", "raster", "velox", "readr", "stringr", "zoo", "scales","tweetdata")
 } else {
-packages=c("data.table","dplyr","ggplot2","ggthemes")
+packages=c("data.table","dplyr","ggplot2","ggthemes","scales","zoo")
 }
 
 load_or_install(packages)
