@@ -1,6 +1,6 @@
 # Config for replication
 # Will install and configure R
-# 
+#
 # from https://www.r-bloggers.com/loading-andor-installing-packages-programmatically/
 is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
 load_or_install<-function(package_names)
@@ -16,7 +16,7 @@ load_or_install<-function(package_names)
 }
 
 # calling our two functions:
-packages=c("data.table","dplyr","sf","ggplot2","ggthemes")
+packages=c("data.table","dplyr","sf","ggplot2","ggthemes", "raster", "velox", "readr", "stringr", "zoo", "scales")
 load_or_install(packages)
 
 resultsdir <- "./results"
