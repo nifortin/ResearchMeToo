@@ -17,8 +17,7 @@ load_or_install<-function(package_names)
 
 # calling our two functions:
 sys <- Sys.info()
-# if ( sys["nodename"] == "patricksserver")
-if ( sys["user"] == "pbaylis" ) {
+if ( sys["nodename"] == "minmax" & sys["user"] == "pbaylis") {
 packages=c("data.table","dplyr","sf","ggplot2","ggthemes", "raster", "velox", "readr", "stringr", "zoo", "scales","tweetdata")
 } else {
 packages=c("data.table","dplyr","ggplot2","ggthemes","scales","zoo")

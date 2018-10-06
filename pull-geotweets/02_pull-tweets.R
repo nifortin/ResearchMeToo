@@ -1,44 +1,42 @@
-# Pull tweets from various datasets
-
+##### Extract and save #metoo and related tweets
 source("config.R",echo=TRUE)
 
+# Extract tweets from larger set of tweets on Patrick's server ----
+sys <- Sys.info()
+if (sys["nodename"] == "minmax" & sys["user"] == "pbaylis") {
+	if (file.exists(filepre2017.rds)) {
+		print(paste("File",filepre2017.rds,"already there. Delete if you want to redownload",sep=" "))
+	} else {
+	# Pull tweets for the USA for a limited time frame
+	cbsas <- st_read("data/tl_2010_us_cbsa10/tl_2010_us_cbsa10.shp")[, "GEOID10"]
 
-if (file.exists(filepre2017.rds)) {
-	print(paste("File",filepre2017.rds,"already there. Delete if you want to redownload",sep=" "))
+	# Tarano and Murphy (2017) and Manikonda et. al. (2017) use just #metoo (with case variations)
+	# I add #timesup as well
+
+	# Pulling for before and after separately since after kept breaking. Could combine, but no need.
+	metoo_tweets_before2017 <- pull_tweets_usa(dates = seq(as.IDate("2006-01-01"), as.IDate("2017-01-01"), 1),
+	                                words = c("#metoo", "#timesup"),
+	                                poly = cbsas)
+
+	saveRDS(metoo_tweets_before2017, filepre2017.rds)
+	}
+
+	if (file.exists(filepost2017.rds)) {
+		print(paste("File",filepost2017.rds,"already there. Delete if you want to redownload",sep=" "))
+	} else {
+	cbsas <- st_read(file.path(shpdir, shpfile))[, "GEOID10"]
+
+	metoo_tweets_after2017 <- pull_tweets_usa(dates = seq(as.IDate("2017-01-01"), as.IDate(Sys.Date()), 1),
+	                                words = c("#metoo", "#timesup"),
+	                                poly = cbsas)
+
+	saveRDS(metoo_tweets_after2017, filepost2017.rds)
+	}
 } else {
-# Pull tweets for the USA for a limited time frame
-cbsas <- st_read("data/tl_2010_us_cbsa10/tl_2010_us_cbsa10.shp")[, "GEOID10"]
-#metoo_tweets <- pull_tweets_usa(dates = as.IDate(c("2015-01-01", "2018-01-01")),
-#                                words = "#metoo",
-#                                poly = cbsas,
-#                                n_max = 100000)
-
-
-# Tarano and Murphy (2017) and Manikonda et. al. (2017) use just #metoo (with case variations)
-# I add #timesup as well
-
-# Pulling for before and after separately since after kept breaking. Could combine, but no need.
-
-metoo_tweets_before2017 <- pull_tweets_usa(dates = seq(as.IDate("2006-01-01"), as.IDate("2017-01-01"), 1),
-                                words = c("#metoo", "#timesup"),
-                                poly = cbsas)
-
-saveRDS(metoo_tweets_before2017, filepre2017.rds)
+  warning("Tweet extraction skipped; can only be run from Patrick Baylis' server.")
 }
 
-if (file.exists(filepost2017.rds)) {
-	print(paste("File",filepost2017.rds,"already there. Delete if you want to redownload",sep=" "))
-} else {
-cbsas <- st_read("data/tl_2010_us_cbsa10/tl_2010_us_cbsa10.shp")[, "GEOID10"]
-
-metoo_tweets_after2017 <- pull_tweets_usa(dates = seq(as.IDate("2017-01-01"), as.IDate(Sys.Date()), 1),
-                                words = c("#metoo", "#timesup"),
-                                poly = cbsas)
-
-saveRDS(metoo_tweets_after2017, filepost2017.rds)
-}
-
-
+# Combine tweets from before and after 2017 -----
 if (file.exists(tweets.rds)) {
 	print(paste("File",tweets.rds,"already there. Delete if you want to redownload",sep=" "))
 } else {
@@ -54,3 +52,4 @@ if (file.exists(tweets.csv)) {
   metoo_tweets <- readRDS(tweets.rds)
   write_csv(metoo_tweets, tweets.csv)
 }
+
