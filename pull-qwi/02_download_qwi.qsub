@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N 02downqwi
+#PBS -l ncpus=8
+#PBS -l mem=132768mb
+#PBS -j oe
+#PBS -l walltime=24:10:00
+#PBS -m ae
+source /etc/profile.d/modules.sh
+cd $PBS_O_WORKDIR
+module load R
+export PATH=/cac/contrib/anaconda/envs/rstudio/bin/:$PATH
+Rscript -e "rmarkdown::render('02_download_qwi.Rmd')"
+
