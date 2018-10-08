@@ -16,7 +16,7 @@ load_or_install<-function(package_names)
 }
 
 # calling our two functions:
-packages=c("gdata","knitr","ggplot2","dplyr","tictoc")
+packages=c("rmarkdown","knitr","ggplot2","dplyr","tictoc")
 load_or_install(packages)
 
 resultsdir <- "./results"
