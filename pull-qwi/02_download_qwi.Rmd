@@ -47,30 +47,40 @@ write.csv(x = version[,c("type","schema","release")],file=file.path(datadir,"met
 We first define (source) a function '[download_qwi.R](download_qwi.R)' to download and subset QWI CSV files.
 ```{r define_function,cache=FALSE}
 source("download_qwi.R",echo = TRUE)
+# this one will work with the OLD directory structure (prior to R2018Q3)
+source("download_qwi_old.R",echo = TRUE)
 download.date <- Sys.Date()
 ```
 A convenience function:
 ```{r define_func2, cache=FALSE}
 download_tasks <- function (state,subset=TRUE) {
-	dat <- download_qwi(state,"sa_f_gc_ns_op_u")
+  if ( sys["user"] == "lv39") {
+    dat <- download_qwi_old(state,"sa_f_gc_ns_op_u")
+  } else {
+	  dat <- download_qwi(state,"sa_f_gc_ns_op_u")
+  }
 	dat$state <- tolower(state)
     if (subset) {
     	dat <- filter(dat,
-    			  geo_level=="C" & 
-                  ownercode=="A05" & 
-                  race =="A0" & 
-                  ethnicity =="A0" & 
-                  education == "E0" & 
-                  firmage=="0" & 
+    			  geo_level=="C" &
+                  ownercode=="A05" &
+                  race =="A0" &
+                  ethnicity =="A0" &
+                  education == "E0" &
+                  firmage=="0" &
                   firmsize=="0" &
-                  year == qwiyear & 
-                  quarter == qwiquarter 
-                  #sex=="0" & 
-                  #agegrp =="A00" & 
+                  year == qwiyear &
+                  quarter == qwiquarter
+                  #sex=="0" &
+                  #agegrp =="A00" &
                 )
     return(dat)
     }
 }
+```
+A convenience function to download the version files
+```{r define_func2, cache=FALSE}
+
 download_version <- function (state,old=FALSE) {
 	if (old) {
 		# for some states, the location is the new one, but the filename is the old one
@@ -81,7 +91,7 @@ download_version <- function (state,old=FALSE) {
 	}
 	print(filename)
 	version.url <- url(filename)
-    version <- read.csv(version.url,header = FALSE,sep = "",as.is = TRUE) 
+    version <- read.csv(version.url,header = FALSE,sep = "",as.is = TRUE)
     names(version) <- c("type","state","fips","range","schema","release","vintage")
     version$download_date <- Sys.Date()
     if (old) {
@@ -104,7 +114,7 @@ oldstates <- unlist(strsplit(oldstates," "))
 
 ```{r download_all,cache=TRUE}
 tic.clearlog()
-for (x in qwistates) { 
+for (x in qwistates) {
   tic(x)
   eval(parse(text=paste("dat <- download_tasks(\"",x,"\")",sep = "")))
   # combine the files
@@ -130,7 +140,7 @@ Collect metadata:
 ```{r collate_metadata,cache=TRUE}
 # also do the versions
 tic.clearlog()
-for (x in qwistates) { 
+for (x in qwistates) {
   tic(x)
   if (x %in% oldstates) {
   	eval(parse(text=paste("dat<- download_version(\"",x,"\",old=TRUE)",sep = "")))

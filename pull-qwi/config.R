@@ -1,6 +1,6 @@
 # Config for replication
 # Will install and configure R
-# 
+#
 # from https://www.r-bloggers.com/loading-andor-installing-packages-programmatically/
 is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
 load_or_install<-function(package_names)
@@ -35,3 +35,4 @@ qwivintage <- "latest_release"
 qwiyear    <- 2016
 qwiquarter <- 1
 
+sys <- Sys.info()
