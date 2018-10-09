@@ -15,6 +15,8 @@ load_or_install<-function(package_names)
   }
 }
 
+sys <- Sys.info()
+
 # calling our two functions:
 packages=c("rmarkdown","knitr","ggplot2","dplyr","tictoc")
 load_or_install(packages)
@@ -23,7 +25,11 @@ resultsdir <- "./results"
 datadir <- "../data/qwi"
 
 # QWI specific parameters
-urlbase <- "http://lehd.ces.census.gov/data/qwi"
+if ( sys["user"] == "lv39") {
+  urlbase <- "file:///data/raw/qwipu"
+} else {
+  urlbase <- "http://lehd.ces.census.gov/data/qwi"
+}
 # this could also be "latest_release"
 # qwivintage <- "R2015Q3"
 qwistates <- "AK AL AR AZ CA CO CT DC DE FL GA HI IA ID IL IN KS KY LA MA MD ME MI MN MO MS MT NC ND NE NH NJ NM NV NY OH OK OR PA RI SC SD TN TX UT VA VT WA WI WV WY"
@@ -34,5 +40,3 @@ qwivintage <- "latest_release"
 # This is not the year we download, this is the year we capture the data for (time series)
 qwiyear    <- 2016
 qwiquarter <- 1
-
-sys <- Sys.info()
